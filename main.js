@@ -84,6 +84,82 @@
 
 
 
+//****************************************************************** */
+// //window对象增加一个jQuery函数
+// window.jQuery = function(node) {
+//     let nodes = {}
+//     return nodes
+// }
+
+
+// //jQuery函数增加ajax方法
+// window.jQuery.ajax = function({ url, method, body, fail, success }) {
+//     //这个地方用了析构的方法，将传入的参数直接对应函数内的同名变量。
+//     //实例一个XMLHttpRequest对象用于实现ajax
+//     let request = new XMLHttpRequest()
+//         //配置，初始化，传入请求方法以及请求地址
+//     request.open(method, url)
+//         // for (let key in headers) {
+//         //     let value = headers[key]
+//         //     request.setRequestHeader(key, value)
+//         // }
+//         //监听请求状态的改变
+//     request.onreadystatechange = () => {
+//             // 如果请求状态等于4，也就是请求响应完成
+//             if (request.readyState === 4) {
+//                 // 如果响应成功
+//                 if (request.status >= 200 & request.status < 300) {
+//                     // 调用success方法，传入响应字符串
+//                     success.call(undefined, request.responseText)
+
+//                 }
+//                 // 如果响应失败
+//                 else if (request.status >= 400) {
+//                     //调用fail方法，传入请求ajax对象
+//                     fail.call(undefined, request)
+//                 }
+//             }
+//         }
+//         //发送请求
+//     request.send(body)
+// }
+
+
+
+
+// //监听鼠标点击事件
+// myButton.addEventListener('click', (e) => {
+//     // 调用ajax方法
+//     window.jQuery.ajax({
+//         //传参
+//         url: '/xxx',
+//         method: 'post',
+//         // headers: {
+//         //     'frank': '18',
+//         //     'content-type': 'x-www-form-urlencoded'
+//         // }
+//         body: 'bodybodybody',
+//         success: function(x) {
+//             // 回调函数1
+//             let xx = window.JSON.parse(x)
+//             console.log(xx.note.to)
+//         },
+//         fail: function(x) {
+//             // 回调函数2
+//             console.log(x)
+//         }
+//     })
+// })
+
+
+
+
+
+
+
+
+
+
 
 //window对象增加一个jQuery函数
 window.jQuery = function(node) {
@@ -93,35 +169,49 @@ window.jQuery = function(node) {
 
 
 //jQuery函数增加ajax方法
-window.jQuery.ajax = function({ url, method, body, fail, success }) {
+//使用Promise规范少传两个参数，即成功失败两个方法名称
+window.jQuery.ajax = function({ url, method, body }) {
     //这个地方用了析构的方法，将传入的参数直接对应函数内的同名变量。
-    //实例一个XMLHttpRequest对象用于实现ajax
-    let request = new XMLHttpRequest()
-        //配置，初始化，传入请求方法以及请求地址
-    request.open(method, url)
-        // for (let key in headers) {
-        //     let value = headers[key]
-        //     request.setRequestHeader(key, value)
-        // }
-        //监听请求状态的改变
-    request.onreadystatechange = () => {
-            // 如果请求状态等于4，也就是请求响应完成
-            if (request.readyState === 4) {
-                // 如果响应成功
-                if (request.status >= 200 & request.status < 300) {
-                    // 调用success方法，传入响应字符串
-                    success.call(undefined, request.responseText)
 
-                }
-                // 如果响应失败
-                else if (request.status >= 400) {
-                    //调用fail方法，传入请求ajax对象
-                    fail.call(undefined, request)
+
+
+
+    // 重要部分***************返回一个Promise对象，将ajax实现部分放入参数函数体内
+    //，并且修改成功失败函数名字
+    return new Promise(function(resolve, reject) {
+
+
+
+        //实例一个XMLHttpRequest对象用于实现ajax
+        let request = new XMLHttpRequest()
+            //配置，初始化，传入请求方法以及请求地址
+        request.open(method, url)
+            // for (let key in headers) {
+            //     let value = headers[key]
+            //     request.setRequestHeader(key, value)
+            // }
+            //监听请求状态的改变
+        request.onreadystatechange = () => {
+                // 如果请求状态等于4，也就是请求响应完成
+                if (request.readyState === 4) {
+                    // 如果响应成功
+                    if (request.status >= 200 & request.status < 300) {
+                        // 调用success方法，传入响应字符串
+                        resolve.call(undefined, request.responseText)
+
+                    }
+                    // 如果响应失败
+                    else if (request.status >= 400) {
+                        //调用fail方法，传入请求ajax对象
+                        reject.call(undefined, request)
+                    }
                 }
             }
-        }
-        //发送请求
-    request.send(body)
+            //发送请求
+        request.send(body)
+
+    })
+
 }
 
 
@@ -132,34 +222,39 @@ myButton.addEventListener('click', (e) => {
     // 调用ajax方法
     window.jQuery.ajax({
         //传参
-        url: '/xxx',
+        url: '/xxxx',
         method: 'post',
         // headers: {
         //     'frank': '18',
         //     'content-type': 'x-www-form-urlencoded'
         // }
-        body: 'bodybodybody',
-        success: function(x) {
-            // 回调函数1
-            let xx = window.JSON.parse(x)
-            console.log(xx.note.to)
+        body: 'bodybodybody'
+
+
+        //这个地方删掉两个回调函数
+
+
+    }).then(
+        (x) => {
+            console.log(x + "11")
+            return x + "22"
         },
-        fail: function(x) {
-            // 回调函数2
+        (x) => {
+            console.log('error1')
+            return 'error2'
+        }).then(
+        (x) => {
+            console.log(x)
+        },
+        (x) => {
             console.log(x)
         }
-    })
+
+    )
+
+
+
 })
-
-
-
-
-
-
-
-
-
-
 
 
 
